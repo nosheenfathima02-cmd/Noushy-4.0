@@ -1,11 +1,10 @@
 {
-  "background_color": "#ffffff",
-  "dir": "ltr",
+  "name": "Nousheen's Life Tracker",
+  "short_name": "Life Tracker",
+  "description": "Track your personal, health, and professional life",
+  "start_url": ".",
   "display": "standalone",
-  "name": "nosheenfathima02-cmd.github",
-  "orientation": "any",
-  "scope": "/",
-  "short_name": "nosheenfathima02-cmd.github",
-  "start_url": "/",
-  "theme_color": "#ffffff"
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "orientation": "portrait"
 }
