@@ -1,0 +1,1489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nousheen's Life Tracker - Auto Prayer Times</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 15px;
+        }
+
+        .btn {
+            background: white;
+            color: #667eea;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9em;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            background: #f0f0f0;
+        }
+
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .tab-button {
+            flex: 1;
+            min-width: 120px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            background: #f8f9fa;
+            border: none;
+            font-size: 1em;
+            font-weight: 600;
+            color: #495057;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button:hover {
+            background: #e9ecef;
+        }
+
+        .tab-button.active {
+            background: white;
+            color: #667eea;
+            border-bottom: 3px solid #667eea;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 20px;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .section {
+            background: #f8f9fa;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .item.completed {
+            opacity: 0.6;
+        }
+
+        .item.completed .item-title {
+            text-decoration: line-through;
+        }
+
+        .item-checkbox {
+            width: 20px;
+            height: 20px;
+            margin-top: 3px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .item-content {
+            flex: 1;
+        }
+
+        .item-title {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .item-details {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            padding: 8px 12px;
+            border-radius: 5px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .checkbox-item {
+            background: white;
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .checkbox-item input {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            cursor: pointer;
+        }
+
+        .checkbox-item.completed {
+            background: #d4edda;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #667eea;
+        }
+
+        .close {
+            font-size: 2em;
+            cursor: pointer;
+            color: #999;
+            border: none;
+            background: none;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+
+        .prayer-time {
+            background: white;
+            padding: 15px;
+            margin: 8px 0;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+        }
+
+        .prayer-time.current {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.02);
+            border-left: 4px solid #ffd700;
+        }
+
+        .prayer-name {
+            font-weight: 600;
+            font-size: 1.1em;
+        }
+
+        .prayer-time-value {
+            font-size: 1.2em;
+            font-weight: 700;
+        }
+
+        .checkbox-item.prayed {
+            background: #d4edda;
+        }
+
+        .grid-calendar {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .day-box {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 5px;
+        }
+
+        .day-box:hover {
+            transform: scale(1.05);
+            border-color: #667eea;
+        }
+
+        .day-box.completed {
+            background: #48bb78;
+            color: white;
+            border-color: #48bb78;
+        }
+
+        .day-number {
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        .day-icon {
+            font-size: 1.2em;
+            margin-top: 3px;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .tab-button {
+                min-width: 100px;
+                padding: 12px 8px;
+                font-size: 0.9em;
+            }
+        }
+
+        .loading-indicator {
+            display: inline-block;
+            margin-left: 10px;
+            color: #ffd700;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .prayer-status {
+            font-size: 0.85em;
+            margin-top: 5px;
+            font-style: italic;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #c33;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #3c3;
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #3c3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌸 Nousheen's Life Tracker 🌸</h1>
+            <p>Track your life, one step at a time</p>
+            <div class="header-buttons">
+                <button class="btn" onclick="exportData()">💾 Export Data</button>
+                <button class="btn" onclick="importData()">📥 Import Data</button>
+                <button class="btn" onclick="getPrayerTimes()">🔄 Refresh Prayer Times</button>
+            </div>
+        </div>
+
+        <div class="tabs">
+            <button class="tab-button active" onclick="switchTab('personal')">👤 Personal</button>
+            <button class="tab-button" onclick="switchTab('health')">💪 Health</button>
+            <button class="tab-button" onclick="switchTab('religious')">☪️ Religious</button>
+            <button class="tab-button" onclick="switchTab('professional')">💼 Professional</button>
+        </div>
+
+        <!-- PERSONAL TAB -->
+        <div id="personal-tab" class="tab-content active">
+            <div class="section">
+                <h3>📚 Education Tasks</h3>
+                <div id="education-list"></div>
+                <button class="btn-primary" onclick="openModal('education')">➕ Add Education Task</button>
+            </div>
+            <div class="section">
+                <h3>🛂 Visa/Immigration Tasks</h3>
+                <div id="visa-list"></div>
+                <button class="btn-primary" onclick="openModal('visa')">➕ Add Visa Task</button>
+            </div>
+            <div class="section">
+                <h3>🚗 License/Driving Tasks</h3>
+                <div id="license-list"></div>
+                <button class="btn-primary" onclick="openModal('license')">➕ Add License Task</button>
+            </div>
+        </div>
+
+        <!-- HEALTH TAB -->
+        <div id="health-tab" class="tab-content">
+            <div class="section">
+                <h3>✅ Daily Health Habits</h3>
+                <div class="checkbox-item" id="habit-wakeup-item">
+                    <input type="checkbox" id="habit-wakeup" onchange="saveHabit('wakeup')">
+                    <label for="habit-wakeup">Wake up before 8 AM</label>
+                </div>
+                <div class="checkbox-item" id="habit-water-item">
+                    <input type="checkbox" id="habit-water" onchange="saveHabit('water')">
+                    <label for="habit-water">Drink 8 glasses of water</label>
+                </div>
+                <div class="checkbox-item" id="habit-veg-item">
+                    <input type="checkbox" id="habit-veg" onchange="saveHabit('veg')">
+                    <label for="habit-veg">Eat vegetables today</label>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h3>⚖️ Weight Tracker</h3>
+                <input type="number" id="weight-input" placeholder="Enter weight (kg)" step="0.1">
+                <input type="date" id="weight-date">
+                <button class="btn-primary" onclick="addWeight()">➕ Add Weight</button>
+                <div id="weight-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>📝 Health Notes</h3>
+                <textarea id="health-note" placeholder="Write a health note..." rows="3"></textarea>
+                <button class="btn-primary" onclick="addHealthNote()">➕ Add Note</button>
+                <div id="health-notes-list"></div>
+            </div>
+        </div>
+
+        <!-- RELIGIOUS TAB -->
+        <div id="religious-tab" class="tab-content">
+            <div class="section">
+                <h3>🕌 Prayer Times Today <span id="prayer-loading"></span></h3>
+                <div id="prayer-location-info" style="color: #666; font-size: 0.9em; margin-bottom: 10px;"></div>
+                <div id="prayer-times-container"></div>
+            </div>
+
+            <div class="section">
+                <h3>✅ Daily Prayer Tracker</h3>
+                <div id="prayer-checkboxes"></div>
+            </div>
+
+            <div class="section">
+                <h3>📖 Quran Reading</h3>
+                <input type="text" id="surah-name" placeholder="Surah name">
+                <input type="number" id="surah-from" placeholder="From verse" min="1">
+                <input type="number" id="surah-to" placeholder="To verse" min="1">
+                <input type="date" id="surah-date">
+                <button class="btn-primary" onclick="addQuran()">➕ Add Reading</button>
+                <div id="quran-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>🌙 Ramadan Activities (Daily Reset)</h3>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="ramadan-suhoor" onchange="saveRamadan('suhoor')">
+                    <label for="ramadan-suhoor">Had Suhoor</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="ramadan-iftar" onchange="saveRamadan('iftar')">
+                    <label for="ramadan-iftar">Had Iftar</label>
+                </div>
+                <div class="checkbox-item">
+                    <input type="checkbox" id="ramadan-listen" onchange="saveRamadan('listen')">
+                    <label for="ramadan-listen">Listened to Quran Today</label>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>✨ Good Deeds Log</h3>
+                <input type="text" id="good-deed-title" placeholder="What good deed did you do?">
+                <textarea id="good-deed-details" placeholder="Details (optional)" rows="2"></textarea>
+                <input type="date" id="good-deed-date">
+                <button class="btn-primary" onclick="addGoodDeed()">➕ Add Good Deed</button>
+                <div id="good-deeds-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>⚠️ Mistakes to Avoid</h3>
+                <input type="text" id="bad-deed-title" placeholder="What mistake happened?">
+                <textarea id="bad-deed-details" placeholder="How to avoid it next time?" rows="2"></textarea>
+                <input type="date" id="bad-deed-date">
+                <button class="btn-primary" onclick="addBadDeed()">➕ Add Reminder</button>
+                <div id="bad-deeds-list"></div>
+            </div>
+
+            <div class="section">
+                <h3>🌙 Ramadan Fasting Chart (30 Days)</h3>
+                <div id="fasting-chart" class="grid-calendar"></div>
+            </div>
+
+            <div class="section">
+                <h3>🕌 Taraweeh Chart (30 Days)</h3>
+                <div id="taraweeh-chart" class="grid-calendar"></div>
+            </div>
+
+            <div class="section">
+                <h3>📖 Quran Reading Chart (30 Days)</h3>
+                <div id="quran-reading-chart" class="grid-calendar"></div>
+            </div>
+
+            <div class="section">
+                <h3>📚 Juz Completion Chart (30 Juz)</h3>
+                <div id="juz-chart" class="grid-calendar"></div>
+            </div>
+
+            <div class="section">
+                <h3>🕌 5 Daily Prayers Chart (30 Days)</h3>
+                <div id="five-prayers-chart" class="grid-calendar"></div>
+            </div>
+        </div>
+
+        <!-- PROFESSIONAL TAB -->
+        <div id="professional-tab" class="tab-content">
+            <div class="section">
+                <h3>🎓 School Tasks</h3>
+                <div id="school-list"></div>
+                <button class="btn-primary" onclick="openModal('school')">➕ Add School Task</button>
+            </div>
+            <div class="section">
+                <h3>🎥 Video Projects</h3>
+                <div id="video-list"></div>
+                <button class="btn-primary" onclick="openModal('video')">➕ Add Video Project</button>
+            </div>
+            <div class="section">
+                <h3>📚 Lesson Plans</h3>
+                <div id="lesson-list"></div>
+                <button class="btn-primary" onclick="openModal('lesson')">➕ Add Lesson Plan</button>
+            </div>
+            <div class="section">
+                <h3>⏰ Reminders</h3>
+                <div id="reminders-list"></div>
+                <button class="btn-primary" onclick="openModal('reminder')">➕ Add Reminder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add Item</h2>
+                <button class="close" onclick="closeModal()">&times;</button>
+            </div>
+            <input type="text" id="modal-title-input" placeholder="Title">
+            <textarea id="modal-details-input" placeholder="Details (optional)" rows="3"></textarea>
+            <input type="date" id="modal-deadline">
+            <div id="modal-datetime-container" style="display: none;">
+                <input type="datetime-local" id="modal-datetime">
+            </div>
+            <button class="btn-primary" onclick="saveModal()">💾 Save</button>
+        </div>
+    </div>
+
+    <script>
+        // ═══════════════════════════════════════════════════════════
+        // DATA STRUCTURE
+        // ═══════════════════════════════════════════════════════════
+        
+        let appData = {
+            personal: { education: [], visa: [], license: [] },
+            health: { habits: {}, notes: [], weight: [] },
+            religious: { 
+                prayers: {}, 
+                quran: [], 
+                ramadan: {},
+                goodDeeds: [],
+                badDeeds: [],
+                fastingChart: {},
+                taraweehChart: {},
+                quranReadingChart: {},
+                juzChart: {},
+                fivePrayersChart: {}
+            },
+            professional: { school: [], video: [], lesson: [], reminders: [] },
+            prayerTimes: null,
+            location: null,
+            lastPrayerUpdate: null
+        };
+
+        let currentModal = '';
+        let idCounter = Date.now();
+
+        // ═══════════════════════════════════════════════════════════
+        // TAB SWITCHING
+        // ═══════════════════════════════════════════════════════════
+        
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`${tabName}-tab`).classList.add('active');
+            event.target.classList.add('active');
+            
+            if (tabName === 'health') loadHabits();
+            if (tabName === 'religious') {
+                loadRamadan();
+                renderPrayerCheckboxes();
+                renderCalendars();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // PRAYER TIMES (ENHANCED WITH LOADING & TAHAJUD)
+        // ═══════════════════════════════════════════════════════════
+        
+        async function getPrayerTimes() {
+            const loadingEl = document.getElementById('prayer-loading');
+            const container = document.getElementById('prayer-times-container');
+            const locationInfo = document.getElementById('prayer-location-info');
+            
+            loadingEl.innerHTML = '<span class="loading-indicator">⏳ Loading prayer times...</span>';
+            
+            try {
+                // Check if we have cached prayer times from today
+                const today = new Date().toDateString();
+                if (appData.prayerTimes && appData.lastPrayerUpdate === today) {
+                    console.log('Using cached prayer times');
+                    renderPrayerTimes();
+                    loadingEl.innerHTML = '<span style="color: #48bb78;">✓ Loaded</span>';
+                    setTimeout(() => loadingEl.innerHTML = '', 2000);
+                    return;
+                }
+
+                // Get user's location
+                const position = await new Promise((resolve, reject) => {
+                    navigator.geolocation.getCurrentPosition(resolve, reject, {
+                        timeout: 10000,
+                        maximumAge: 300000 // 5 minutes
+                    });
+                });
+
+                const { latitude, longitude } = position.coords;
+                appData.location = { latitude, longitude };
+
+                // Fetch from Aladhan API
+                const date = new Date();
+                const response = await fetch(
+                    `https://api.aladhan.com/v1/timings/${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}?latitude=${latitude}&longitude=${longitude}&method=2`
+                );
+
+                if (!response.ok) throw new Error('Failed to fetch prayer times');
+
+                const data = await response.json();
+                const timings = data.data.timings;
+                
+                // Calculate Tahajud (last third of night)
+                const maghribTime = new Date(`${date.toDateString()} ${timings.Maghrib}`);
+                const fajrTime = new Date(`${date.toDateString()} ${timings.Fajr}`);
+                
+                // If Fajr is earlier in time, it's the next day
+                if (fajrTime < maghribTime) {
+                    fajrTime.setDate(fajrTime.getDate() + 1);
+                }
+                
+                const nightDuration = fajrTime - maghribTime;
+                const lastThirdStart = new Date(maghribTime.getTime() + (nightDuration * 2 / 3));
+                const tahajudTime = lastThirdStart.toTimeString().slice(0, 5);
+
+                appData.prayerTimes = {
+                    Fajr: timings.Fajr,
+                    Sunrise: timings.Sunrise,
+                    Dhuhr: timings.Dhuhr,
+                    Asr: timings.Asr,
+                    Maghrib: timings.Maghrib,
+                    Isha: timings.Isha,
+                    Tahajud: tahajudTime
+                };
+                
+                appData.lastPrayerUpdate = today;
+                
+                locationInfo.textContent = `📍 Location: ${data.data.meta.latitude.toFixed(2)}, ${data.data.meta.longitude.toFixed(2)} | Method: ${data.data.meta.method.name}`;
+                
+                saveData();
+                renderPrayerTimes();
+                renderPrayerCheckboxes();
+                
+                loadingEl.innerHTML = '<span style="color: #48bb78;">✓ Updated successfully!</span>';
+                setTimeout(() => loadingEl.innerHTML = '', 3000);
+                
+                showNotification('Prayer Times Updated', 'Prayer times have been refreshed for today');
+                
+            } catch (error) {
+                console.error('Error fetching prayer times:', error);
+                loadingEl.innerHTML = '';
+                
+                if (error.code === 1) {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            📍 <strong>Location Access Denied</strong><br>
+                            Please enable location permissions to get accurate prayer times.
+                            <button class="btn-primary" onclick="getPrayerTimes()" style="margin-top: 10px;">Try Again</button>
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = `
+                        <div class="error-message">
+                            ⚠️ <strong>Unable to load prayer times</strong><br>
+                            ${error.message || 'Please check your internet connection and try again.'}
+                            <button class="btn-primary" onclick="getPrayerTimes()" style="margin-top: 10px;">Retry</button>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function renderPrayerTimes() {
+            const container = document.getElementById('prayer-times-container');
+            if (!appData.prayerTimes) {
+                container.innerHTML = '<p style="color: #999;">Click "Refresh Prayer Times" to load today\'s prayer schedule</p>';
+                return;
+            }
+
+            const now = new Date();
+            const currentTime = now.getHours() * 60 + now.getMinutes();
+
+            const prayers = [
+                { name: 'Fajr', time: appData.prayerTimes.Fajr, icon: '🌅' },
+                { name: 'Sunrise', time: appData.prayerTimes.Sunrise, icon: '☀️' },
+                { name: 'Dhuhr', time: appData.prayerTimes.Dhuhr, icon: '🌞' },
+                { name: 'Asr', time: appData.prayerTimes.Asr, icon: '🌤️' },
+                { name: 'Maghrib', time: appData.prayerTimes.Maghrib, icon: '🌆' },
+                { name: 'Isha', time: appData.prayerTimes.Isha, icon: '🌙' },
+                { name: 'Tahajud', time: appData.prayerTimes.Tahajud, icon: '⭐' }
+            ];
+
+            let currentPrayer = null;
+            let nextPrayer = null;
+
+            for (let i = 0; i < prayers.length - 1; i++) {
+                const prayerMinutes = timeToMinutes(prayers[i].time);
+                const nextPrayerMinutes = timeToMinutes(prayers[i + 1].time);
+                
+                if (currentTime >= prayerMinutes && currentTime < nextPrayerMinutes) {
+                    currentPrayer = prayers[i];
+                    nextPrayer = prayers[i + 1];
+                    break;
+                }
+            }
+
+            container.innerHTML = prayers.map(prayer => `
+                <div class="prayer-time ${prayer === currentPrayer ? 'current' : ''}">
+                    <div>
+                        <div class="prayer-name">${prayer.icon} ${prayer.name}</div>
+                        ${prayer === currentPrayer ? '<div class="prayer-status">Current Prayer Time</div>' : ''}
+                        ${prayer.name === 'Tahajud' ? '<div class="prayer-status">Last third of the night</div>' : ''}
+                    </div>
+                    <div class="prayer-time-value">${prayer.time}</div>
+                </div>
+            `).join('');
+        }
+
+        function timeToMinutes(timeStr) {
+            const [hours, minutes] = timeStr.split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        function renderPrayerCheckboxes() {
+            const container = document.getElementById('prayer-checkboxes');
+            const today = new Date().toDateString();
+            
+            const prayerNames = ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha', 'Tahajud'];
+            
+            container.innerHTML = prayerNames.map(prayer => `
+                <div class="checkbox-item ${appData.religious.prayers[prayer] ? 'prayed' : ''}">
+                    <input type="checkbox" 
+                           id="prayer-${prayer}" 
+                           ${appData.religious.prayers[prayer] ? 'checked' : ''}
+                           onchange="togglePrayer('${prayer}')">
+                    <label for="prayer-${prayer}">${prayer} Prayer</label>
+                </div>
+            `).join('');
+        }
+
+        function togglePrayer(prayerName) {
+            appData.religious.prayers[prayerName] = !appData.religious.prayers[prayerName];
+            saveData();
+            renderPrayerCheckboxes();
+        }
+
+        function checkPrayerTimes() {
+            if (!appData.prayerTimes) return;
+
+            const now = new Date();
+            const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            Object.entries(appData.prayerTimes).forEach(([prayer, time]) => {
+                if (prayer !== 'Sunrise' && currentTime === time && !appData.religious.prayers[prayer]) {
+                    showNotification(`🕌 ${prayer} Prayer Time`, `It's time for ${prayer} prayer`);
+                }
+            });
+        }
+
+        function showNotification(title, message) {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification(title, { body: message, icon: '🕌' });
+            }
+        }
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // CALENDAR CHARTS
+        // ═══════════════════════════════════════════════════════════
+        
+        function renderCalendars() {
+            renderCalendar('fasting-chart', 30, '🌙', 'fastingChart');
+            renderCalendar('taraweeh-chart', 30, '🕌', 'taraweehChart');
+            renderCalendar('quran-reading-chart', 30, '📖', 'quranReadingChart');
+            renderCalendar('juz-chart', 30, '📚', 'juzChart');
+            renderCalendar('five-prayers-chart', 30, '🕌', 'fivePrayersChart');
+        }
+
+        function renderCalendar(containerId, days, icon, chartKey) {
+            const container = document.getElementById(containerId);
+            const chart = appData.religious[chartKey] || {};
+            
+            container.innerHTML = Array.from({length: days}, (_, i) => {
+                const day = i + 1;
+                const completed = chart[day] || false;
+                return `
+                    <div class="day-box ${completed ? 'completed' : ''}" 
+                         onclick="toggleChartDay('${chartKey}', ${day})">
+                        <div class="day-number">${day}</div>
+                        <div class="day-icon">${completed ? '✓' : icon}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function toggleChartDay(chartKey, day) {
+            if (!appData.religious[chartKey]) appData.religious[chartKey] = {};
+            appData.religious[chartKey][day] = !appData.religious[chartKey][day];
+            saveData();
+            renderCalendars();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // MODAL FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        function openModal(type) {
+            currentModal = type;
+            document.getElementById('modal').classList.add('active');
+            document.getElementById('modal-title').textContent = `Add ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+            document.getElementById('modal-title-input').value = '';
+            document.getElementById('modal-details-input').value = '';
+            document.getElementById('modal-deadline').value = '';
+            document.getElementById('modal-datetime').value = '';
+            
+            const datetimeContainer = document.getElementById('modal-datetime-container');
+            if (type === 'reminder') {
+                datetimeContainer.style.display = 'block';
+            } else {
+                datetimeContainer.style.display = 'none';
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            currentModal = '';
+        }
+
+        function saveModal() {
+            const title = document.getElementById('modal-title-input').value.trim();
+            if (!title) return alert('Please enter a title');
+
+            const item = {
+                id: idCounter++,
+                title,
+                details: document.getElementById('modal-details-input').value.trim(),
+                deadline: document.getElementById('modal-deadline').value,
+                completed: false
+            };
+
+            if (currentModal === 'reminder') {
+                item.datetime = document.getElementById('modal-datetime').value;
+            }
+
+            if (currentModal === 'school' || currentModal === 'video' || currentModal === 'lesson' || currentModal === 'reminder') {
+                const arrayKey = currentModal === 'reminder' ? 'reminders' : currentModal;
+                if (!appData.professional[arrayKey]) appData.professional[arrayKey] = [];
+                appData.professional[arrayKey].push(item);
+            } else {
+                if (!appData.personal[currentModal]) appData.personal[currentModal] = [];
+                appData.personal[currentModal].push(item);
+            }
+
+            saveData();
+            renderAll();
+            closeModal();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // RENDER FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        function renderAll() {
+            renderItems('education', 'education-list');
+            renderItems('visa', 'visa-list');
+            renderItems('license', 'license-list');
+            renderItems('school', 'school-list');
+            renderItems('video', 'video-list');
+            renderItems('lesson', 'lesson-list');
+            renderItems('reminder', 'reminders-list');
+            renderWeightList();
+            renderHealthNotes();
+            renderQuranList();
+            renderGoodDeeds();
+            renderBadDeeds();
+            renderPrayerTimes();
+            loadHabits();
+            loadRamadan();
+        }
+
+        function renderItems(type, containerId) {
+            const container = document.getElementById(containerId);
+            let items;
+            
+            if (type === 'school' || type === 'video' || type === 'lesson' || type === 'reminder') {
+                const arrayKey = type === 'reminder' ? 'reminders' : type;
+                items = appData.professional[arrayKey] || [];
+            } else {
+                items = appData.personal[type] || [];
+            }
+
+            if (!items.length) {
+                container.innerHTML = '<p style="color: #999;">No items yet. Click the button below to add one!</p>';
+                return;
+            }
+
+            container.innerHTML = items.map(item => `
+                <div class="item ${item.completed ? 'completed' : ''}">
+                    <input type="checkbox" 
+                           class="item-checkbox" 
+                           ${item.completed ? 'checked' : ''}
+                           onchange="toggleComplete('${type}', ${item.id})">
+                    <div class="item-content">
+                        <div class="item-title">${item.title}</div>
+                        ${item.details ? `<div class="item-details">${item.details}</div>` : ''}
+                        ${item.deadline ? `<div class="item-details">📅 ${item.deadline}</div>` : ''}
+                        ${item.datetime ? `<div class="item-details">⏰ ${new Date(item.datetime).toLocaleString()}</div>` : ''}
+                    </div>
+                    <button class="btn-delete" onclick="deleteItem('${type}', ${item.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // WEIGHT TRACKER
+        // ═══════════════════════════════════════════════════════════
+        
+        function addWeight() {
+            const weight = parseFloat(document.getElementById('weight-input').value);
+            const date = document.getElementById('weight-date').value;
+            
+            if (!weight || !date) return alert('Please enter weight and date');
+
+            appData.health.weight.push({
+                id: idCounter++,
+                weight,
+                date
+            });
+
+            saveData();
+            renderWeightList();
+            document.getElementById('weight-input').value = '';
+            document.getElementById('weight-date').value = '';
+        }
+
+        function renderWeightList() {
+            const container = document.getElementById('weight-list');
+            const weights = appData.health.weight || [];
+            
+            if (!weights.length) {
+                container.innerHTML = '<p style="color: #999; margin-top: 10px;">No weight entries yet.</p>';
+                return;
+            }
+
+            const sorted = [...weights].sort((a, b) => new Date(b.date) - new Date(a.date));
+            
+            container.innerHTML = sorted.map(w => `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">⚖️ ${w.weight} kg</div>
+                        <div class="item-details">📅 ${w.date}</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteWeight(${w.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // HEALTH NOTES
+        // ═══════════════════════════════════════════════════════════
+        
+        function addHealthNote() {
+            const note = document.getElementById('health-note').value.trim();
+            if (!note) return alert('Please write a note');
+
+            appData.health.notes.push({
+                id: idCounter++,
+                note,
+                date: new Date().toLocaleDateString()
+            });
+
+            saveData();
+            renderHealthNotes();
+            document.getElementById('health-note').value = '';
+        }
+
+        function renderHealthNotes() {
+            const container = document.getElementById('health-notes-list');
+            const notes = appData.health.notes || [];
+            
+            if (!notes.length) {
+                container.innerHTML = '<p style="color: #999; margin-top: 10px;">No notes yet.</p>';
+                return;
+            }
+
+            container.innerHTML = notes.map(n => `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">📝 ${n.note}</div>
+                        <div class="item-details">📅 ${n.date}</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteHealthNote(${n.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // QURAN READING
+        // ═══════════════════════════════════════════════════════════
+        
+        function addQuran() {
+            const name = document.getElementById('surah-name').value.trim();
+            const from = document.getElementById('surah-from').value;
+            const to = document.getElementById('surah-to').value;
+            const date = document.getElementById('surah-date').value;
+            
+            if (!name || !from || !to || !date) return alert('Please fill all fields');
+
+            appData.religious.quran.push({
+                id: idCounter++,
+                name,
+                from,
+                to,
+                date
+            });
+
+            saveData();
+            renderQuranList();
+            document.getElementById('surah-name').value = '';
+            document.getElementById('surah-from').value = '';
+            document.getElementById('surah-to').value = '';
+            document.getElementById('surah-date').value = '';
+        }
+
+        function renderQuranList() {
+            const container = document.getElementById('quran-list');
+            const surahs = appData.religious.quran || [];
+            
+            if (!surahs.length) {
+                container.innerHTML = '<p style="color: #999; margin-top: 10px;">No Quran readings logged yet.</p>';
+                return;
+            }
+
+            container.innerHTML = surahs.map(s => `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">📖 ${s.name}</div>
+                        <div class="item-details">Verses ${s.from}-${s.to}</div>
+                        <div class="item-details">📅 ${s.date}</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteQuran(${s.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // GOOD & BAD DEEDS
+        // ═══════════════════════════════════════════════════════════
+        
+        function addGoodDeed() {
+            const title = document.getElementById('good-deed-title').value.trim();
+            const details = document.getElementById('good-deed-details').value.trim();
+            const date = document.getElementById('good-deed-date').value;
+            
+            if (!title || !date) return alert('Please enter deed and date');
+
+            appData.religious.goodDeeds.push({
+                id: idCounter++,
+                title,
+                details,
+                date
+            });
+
+            saveData();
+            renderGoodDeeds();
+            document.getElementById('good-deed-title').value = '';
+            document.getElementById('good-deed-details').value = '';
+            document.getElementById('good-deed-date').value = '';
+        }
+
+        function addBadDeed() {
+            const title = document.getElementById('bad-deed-title').value.trim();
+            const details = document.getElementById('bad-deed-details').value.trim();
+            const date = document.getElementById('bad-deed-date').value;
+            
+            if (!title || !date) return alert('Please enter mistake and date');
+
+            appData.religious.badDeeds.push({
+                id: idCounter++,
+                title,
+                details,
+                date
+            });
+
+            saveData();
+            renderBadDeeds();
+            document.getElementById('bad-deed-title').value = '';
+            document.getElementById('bad-deed-details').value = '';
+            document.getElementById('bad-deed-date').value = '';
+        }
+
+        function renderGoodDeeds() {
+            const container = document.getElementById('good-deeds-list');
+            const deeds = appData.religious.goodDeeds || [];
+            
+            if (!deeds.length) {
+                container.innerHTML = '<p style="color: #999; margin-top: 10px;">No good deeds logged yet.</p>';
+                return;
+            }
+            container.innerHTML = deeds.map(d => `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">✨ ${d.title}</div>
+                        ${d.details ? `<div class="item-details">${d.details}</div>` : ''}
+                        <div class="item-details">📅 ${d.date}</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteGoodDeed(${d.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        function renderBadDeeds() {
+            const container = document.getElementById('bad-deeds-list');
+            const deeds = appData.religious.badDeeds || [];
+            
+            if (!deeds.length) {
+                container.innerHTML = '<p style="color: #999; margin-top: 10px;">No mistakes logged yet.</p>';
+                return;
+            }
+            container.innerHTML = deeds.map(d => `
+                <div class="item">
+                    <div class="item-content">
+                        <div class="item-title">⚠️ ${d.title}</div>
+                        ${d.details ? `<div class="item-details">${d.details}</div>` : ''}
+                        <div class="item-details">📅 ${d.date}</div>
+                    </div>
+                    <button class="btn-delete" onclick="deleteBadDeed(${d.id})">🗑️</button>
+                </div>
+            `).join('');
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // DELETE FUNCTIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        function deleteItem(type, id) {
+            if (!confirm('Delete this item?')) return;
+            if (type === 'school' || type === 'video' || type === 'lesson' || type === 'reminder') {
+                const arrayKey = type === 'reminder' ? 'reminders' : type;
+                appData.professional[arrayKey] = (appData.professional[arrayKey] || []).filter(i => i.id !== id);
+            } else {
+                appData.personal[type] = (appData.personal[type] || []).filter(i => i.id !== id);
+            }
+            saveData();
+            renderAll();
+        }
+
+        function deleteWeight(id) {
+            if (!confirm('Delete this weight entry?')) return;
+            appData.health.weight = (appData.health.weight || []).filter(w => w.id !== id);
+            saveData();
+            renderWeightList();
+        }
+
+        function deleteHealthNote(id) {
+            if (!confirm('Delete this note?')) return;
+            appData.health.notes = (appData.health.notes || []).filter(n => n.id !== id);
+            saveData();
+            renderHealthNotes();
+        }
+
+        function deleteQuran(id) {
+            if (!confirm('Delete this surah?')) return;
+            appData.religious.quran = (appData.religious.quran || []).filter(s => s.id !== id);
+            saveData();
+            renderQuranList();
+        }
+
+        function deleteGoodDeed(id) {
+            if (!confirm('Delete this good deed?')) return;
+            appData.religious.goodDeeds = (appData.religious.goodDeeds || []).filter(d => d.id !== id);
+            saveData();
+            renderGoodDeeds();
+        }
+
+        function deleteBadDeed(id) {
+            if (!confirm('Delete this mistake?')) return;
+            appData.religious.badDeeds = (appData.religious.badDeeds || []).filter(d => d.id !== id);
+            saveData();
+            renderBadDeeds();
+        }
+
+        function toggleComplete(type, id) {
+            let items;
+            if (type === 'school' || type === 'video' || type === 'lesson' || type === 'reminder') {
+                const arrayKey = type === 'reminder' ? 'reminders' : type;
+                items = appData.professional[arrayKey];
+            } else {
+                items = appData.personal[type];
+            }
+            if (!items) return;
+            const item = items.find(i => i.id === id);
+            if (item) {
+                item.completed = !item.completed;
+                saveData();
+                renderAll();
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // HEALTH HABITS
+        // ═══════════════════════════════════════════════════════════
+        
+        function saveHabit(habit) {
+            const checkbox = document.getElementById(`habit-${habit}`);
+            const item = document.getElementById(`habit-${habit}-item`);
+            appData.health.habits[habit] = checkbox.checked;
+            if (checkbox.checked) {
+                item.classList.add('completed');
+            } else {
+                item.classList.remove('completed');
+            }
+            saveData();
+        }
+
+        function loadHabits() {
+            const today = new Date().toDateString();
+            const lastReset = localStorage.getItem('lastHabitReset');
+            if (lastReset !== today) {
+                appData.health.habits = {};
+                localStorage.setItem('lastHabitReset', today);
+            }
+            ['wakeup', 'water', 'veg'].forEach(habit => {
+                const checkbox = document.getElementById(`habit-${habit}`);
+                const item = document.getElementById(`habit-${habit}-item`);
+                if (checkbox && item) {
+                    checkbox.checked = appData.health.habits[habit] || false;
+                    if (checkbox.checked) {
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // RAMADAN ACTIVITIES
+        // ═══════════════════════════════════════════════════════════
+        
+        function saveRamadan(activity) {
+            const checkbox = document.getElementById(`ramadan-${activity}`);
+            appData.religious.ramadan[activity] = checkbox.checked;
+            saveData();
+        }
+
+        function loadRamadan() {
+            const today = new Date().toDateString();
+            const lastReset = localStorage.getItem('lastRamadanReset');
+            if (lastReset !== today) {
+                appData.religious.ramadan = {};
+                localStorage.setItem('lastRamadanReset', today);
+                
+                // Reset daily prayer checkboxes
+                appData.religious.prayers = {};
+                saveData();
+                renderPrayerCheckboxes();
+            }
+            ['suhoor', 'iftar', 'listen'].forEach(activity => {
+                const checkbox = document.getElementById(`ramadan-${activity}`);
+                if (checkbox) {
+                    checkbox.checked = appData.religious.ramadan[activity] || false;
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // REMINDER NOTIFICATIONS
+        // ═══════════════════════════════════════════════════════════
+        
+        function checkReminders() {
+            const now = new Date();
+            const reminders = appData.professional.reminders || [];
+            reminders.forEach(reminder => {
+                if (!reminder.completed && reminder.datetime) {
+                    const reminderTime = new Date(reminder.datetime);
+                    const diff = reminderTime - now;
+                    if (diff > 0 && diff < 60000) {
+                        showNotification(`⏰ Reminder: ${reminder.title}`, reminder.details || 'Time for your reminder!');
+                    }
+                }
+            });
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // DATA IMPORT/EXPORT
+        // ═══════════════════════════════════════════════════════════
+        
+        function exportData() {
+            const dataStr = JSON.stringify(appData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `life-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        appData = JSON.parse(event.target.result);
+                        saveData();
+                        renderAll();
+                        alert('Data imported successfully!');
+                    } catch (err) {
+                        alert('Error importing data. Please check the file.');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // DATA STORAGE
+        // ═══════════════════════════════════════════════════════════
+        
+        function saveData() {
+            try {
+                localStorage.setItem('lifeTrackerData', JSON.stringify(appData));
+            } catch (e) {
+                console.error('Error saving:', e);
+            }
+        }
+
+        function loadData() {
+            try {
+                const data = localStorage.getItem('lifeTrackerData');
+                if (data) {
+                    const loaded = JSON.parse(data);
+                    appData = {
+                        personal: {
+                            education: loaded.personal?.education || [],
+                            visa: loaded.personal?.visa || [],
+                            license: loaded.personal?.license || []
+                        },
+                        health: {
+                            habits: loaded.health?.habits || {},
+                            notes: loaded.health?.notes || [],
+                            weight: loaded.health?.weight || []
+                        },
+                        religious: {
+                            prayers: loaded.religious?.prayers || {},
+                            quran: loaded.religious?.quran || [],
+                            ramadan: loaded.religious?.ramadan || {},
+                            goodDeeds: loaded.religious?.goodDeeds || [],
+                            badDeeds: loaded.religious?.badDeeds || [],
+                            fastingChart: loaded.religious?.fastingChart || {},
+                            taraweehChart: loaded.religious?.taraweehChart || {},
+                            quranReadingChart: loaded.religious?.quranReadingChart || {},
+                            juzChart: loaded.religious?.juzChart || {},
+                            fivePrayersChart: loaded.religious?.fivePrayersChart || {}
+                        },
+                        professional: {
+                            school: loaded.professional?.school || [],
+                            video: loaded.professional?.video || [],
+                            lesson: loaded.professional?.lesson || [],
+                            reminders: loaded.professional?.reminders || []
+                        },
+                        prayerTimes: loaded.prayerTimes || null,
+                        location: loaded.location || null,
+                        lastPrayerUpdate: loaded.lastPrayerUpdate || null
+                    };
+                }
+            } catch (e) {
+                console.error('Error loading:', e);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // INITIALIZATION
+        // ═══════════════════════════════════════════════════════════
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Loading Life Tracker...');
+            loadData();
+            renderAll();
+            
+            // Fetch prayer times on startup
+            getPrayerTimes();
+            
+            // Check prayer times and reminders every minute
+            setInterval(checkPrayerTimes, 60000);
+            setInterval(checkReminders, 60000);
+            
+            // Check immediately
+            checkPrayerTimes();
+            checkReminders();
+            
+            console.log('✅ App loaded successfully!');
+        });
+    </script>
+</body>
+</html>
